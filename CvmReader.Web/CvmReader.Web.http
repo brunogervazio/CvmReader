@@ -1,0 +1,6 @@
+@CvmReader.Web_HostAddress = http://localhost:5255
+
+GET {{CvmReader.Web_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
