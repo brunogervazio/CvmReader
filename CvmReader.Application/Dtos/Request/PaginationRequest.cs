@@ -10,7 +10,6 @@ namespace CvmReader.Application.Dtos.Request
         public int Page { get; set; } = 1;
 
         [SwaggerSchema("Número de registros por página.")]
-        [Range(1, 100, ErrorMessage = "O número de itens por página deve ser entre 1 e 100.")]
         public int PageSize { get; set; } = 20;
     }
 }

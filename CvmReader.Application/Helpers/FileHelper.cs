@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.IO;
+using System.IO.Compression;
 
 namespace CvmReader.Application.Helpers
 {
@@ -6,16 +7,16 @@ namespace CvmReader.Application.Helpers
     {
         public static async Task SaveFileAsync(string filePath, byte[] content)
         {
-            string? directory = Path.GetDirectoryName(filePath);
-
-            if (!Directory.Exists(directory))
-                Directory.CreateDirectory(directory!);
+            string directory = Path.GetDirectoryName(filePath) ?? string.Empty;
+            VerifyPath(directory);
 
             await File.WriteAllBytesAsync(filePath, content);
         }
 
         public static string[]? SearchFilePathByName(string filePath, string fileName)
         {
+            VerifyPath(filePath);
+
             string[] paths = Directory.GetFiles(filePath);
             string[] filteredPaths = Array.FindAll(paths, file =>
                 Path.GetFileName(file).Contains(fileName, StringComparison.OrdinalIgnoreCase));
@@ -25,10 +26,12 @@ namespace CvmReader.Application.Helpers
             return filteredPaths;
         }
 
-        public static void ExtractZipFiles(byte[] file, string path)
+        public static void ExtractZipFiles(byte[] file, string filePath)
         {
             var zip = new MemoryStream(file);
             var zipRead = new ZipArchive(zip, ZipArchiveMode.Read);
+
+            VerifyPath(filePath);
 
             foreach (ZipArchiveEntry entry in zipRead.Entries)
             {
@@ -36,7 +39,7 @@ namespace CvmReader.Application.Helpers
                 string fileName = Path.GetFileNameWithoutExtension(entry.Name);
                 fileName = $"{fileName}_{DateTime.Now:yyyy-MM-dd}";
 
-                entry.ExtractToFile(Path.Combine(path, $"{fileName}{fileExtension}"), overwrite: true);
+                entry.ExtractToFile(Path.Combine(filePath, $"{fileName}{fileExtension}"), overwrite: true);
             }
         }
 
@@ -49,6 +52,12 @@ namespace CvmReader.Application.Helpers
                !Path.GetFileName(file).Contains(DateTime.Now.ToString("yyyy-MM-dd"), StringComparison.OrdinalIgnoreCase));
 
             foreach (string file in filteredPaths) File.Delete(file);
+        }
+
+        private static void VerifyPath(string filePath)
+        {
+            if (!Directory.Exists(filePath))
+                Directory.CreateDirectory(filePath!);
         }
     }
 }
